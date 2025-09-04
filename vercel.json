@@ -5,7 +5,7 @@
       "src": "FrontSlack/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "FrontSlack/dist/FrontSlack/browser"
+        "distDir": "dist/FrontSlack/browser"
       }
     }
   ],
