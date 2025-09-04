@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "BackSlack/index.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["BackSlack/**"]
+      }
+    },
+    {
+      "src": "FrontSlack/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "FrontSlack/dist/FrontSlack"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/BackSlack/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/FrontSlack/dist/FrontSlack/index.html"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

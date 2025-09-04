@@ -200,7 +200,7 @@ async function generarExcel(resultados, correos, fechaInicio, fechaFin, diasHabi
 }
 
 // Rutas
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
@@ -208,11 +208,11 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.get('/test', (req, res) => {
+app.get('/api/test', (req, res) => {
   res.send('Servidor está funcionando');
 });
 
-app.post('/procesar', async (req, res) => {
+app.post('/api/procesar', async (req, res) => {
   try {
     console.log('📥 Recibiendo solicitud de procesamiento...');
     
