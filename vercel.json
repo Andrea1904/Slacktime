@@ -12,7 +12,7 @@
       "src": "FrontSlack/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "FrontSlack/dist/FrontSlack"
+        "distDir": "FrontSlack/dist/FrontSlack/browser"
       }
     }
   ],
@@ -23,7 +23,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/FrontSlack/dist/FrontSlack/index.html"
+      "dest": "/FrontSlack/dist/FrontSlack/browser/index.html"
     }
   ],
   "env": {
