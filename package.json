@@ -1,0 +1,45 @@
+{
+  "name": "slacktime",
+  "version": "1.0.0",
+  "description": "Sistema completo para el análisis de tiempo en reuniones de Microsoft Teams y gestión de beneficios laborales",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm install && cd BackSlack && npm install && cd ../FrontSlack && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd BackSlack && npm run dev",
+    "dev:frontend": "cd FrontSlack && npm start",
+    "build": "cd FrontSlack && npm run build",
+    "start:backend": "cd BackSlack && npm start",
+    "start:frontend": "cd FrontSlack && npm start",
+    "test": "cd FrontSlack && npm test",
+    "lint": "cd BackSlack && npm run lint",
+    "lint:fix": "cd BackSlack && npm run lint:fix",
+    "format": "cd BackSlack && npm run format && cd ../FrontSlack && npm run format",
+    "clean": "cd BackSlack && npm run clean",
+    "health": "curl http://localhost:3001/health",
+    "setup": "npm run install:all && npm run format"
+  },
+  "keywords": [
+    "slack",
+    "teams",
+    "meetings",
+    "time-tracking",
+    "excel",
+    "microsoft-graph",
+    "angular",
+    "nodejs"
+  ],
+  "author": "SlackTime Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "workspaces": [
+    "BackSlack",
+    "FrontSlack"
+  ]
+}

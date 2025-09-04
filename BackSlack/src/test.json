@@ -1,0 +1,238 @@
+{
+  "name": "Notificar disponible semanal",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": [
+          {
+            "item": {
+              "mode": "everyWeek",
+              "weekDays": ["friday"],
+              "hours": [9],
+              "minutes": [0],
+              "seconds": [0]
+            }
+          }
+        ]
+      },
+      "name": "Cron (Viernes 09:00)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [150, 200]
+    },
+    {
+      "parameters": {
+        "language": "javascript",
+        "code": "const today = new Date();\nconst day = today.getDay();\nconst daysUntilMonday = (1 + 7 - day) % 7 || 7;\nconst nextMonday = new Date(today);\nnextMonday.setDate(today.getDate() + daysUntilMonday);\nnextMonday.setHours(0, 0, 0, 0);\nreturn [{ json: { nextMonday: nextMonday.toISOString().slice(0,10) } }];"
+      },
+      "name": "Calcular próximo lunes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [350, 200]
+    },
+    {
+      "parameters": {
+        "resource": "worksheet",
+        "operation": "readRows",
+        "workbook": {
+          "__rl": true,
+          "value": "01DS4XRGEY4WCBDSRXJVBZQTAFQ4KPWBNM",
+          "mode": "list",
+          "cachedResultName": "Disponibilidad Soporte Plataforma",
+          "cachedResultUrl": "https://satrack-my.sharepoint.com/personal/adelid_lopez_satrack_com/_layouts/15/Doc.aspx?sourcedoc=%7B1184E598-37CA-434D-984C-058714FB05AC%7D&file=Disponibilidad%20Soporte%20Plataforma.xlsx&action=default&mobileredirect=true&DefaultItemOpen=1"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{229B5C8C-406B-4CAD-8711-243C5D5CABB9}",
+          "mode": "list",
+          "cachedResultName": "Promagracion",
+          "cachedResultUrl": "https://satrack-my.sharepoint.com/personal/adelid_lopez_satrack_com/_layouts/15/Doc.aspx?sourcedoc=%7B1184E598-37CA-434D-984C-058714FB05AC%7D&file=Disponibilidad%20Soporte%20Plataforma.xlsx&action=default&mobileredirect=true&DefaultItemOpen=1&activeCell=Promagracion!A1"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.1,
+      "position": [
+        32,
+        544
+      ],
+      "id": "b280c1b6-9948-485a-9d50-b1fd5f6dda0f",
+      "name": "Get rows from sheet1",
+      "credentials": {
+        "microsoftExcelOAuth2Api": {
+          "id": "u6CCbanJ4064yVSs",
+          "name": "Microsoft Excel account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "javascript",
+        "code": "return items.map(item => {\n  const serial = item.json['FECHA INICIO'];\n  const jsDate = new Date((serial - 25569) * 86400 * 1000);\n  item.json.fecha_disponible = jsDate.toISOString().slice(0,10);\n  return item;\n});"
+      },
+      "name": "Convertir fechas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [750, 200]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": false,
+        "values": {
+          "string": [],
+          "number": [],
+          "boolean": [],
+          "json": [
+            {
+              "name": "nextMonday",
+              "value": "={{ $node['Calcular próximo lunes'].json.nextMonday }}"
+            }
+          ]
+        }
+      },
+      "name": "Set – Preparar fechas",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [950, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.fecha_disponible }}",
+              "operation": "equal",
+              "value2": "={{ $json.nextMonday }}"
+            }
+          ]
+        }
+      },
+      "name": "IF – ¿Es lunes?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1150, 200]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": false,
+        "values": {
+          "string": [
+            {
+              "name": "to",
+              "value": "={{ $json.CORREO }}"
+            },
+            {
+              "name": "subject",
+              "value": "Disponible asignado para este lunes"
+            },
+            {
+              "name": "body",
+              "value": "={{ `Hola ${$json.RESPONSABLE}, tu turno inicia el próximo lunes ${$json.fecha_disponible} a las 2:00 PM.` }}"
+            }
+          ],
+          "number": [],
+          "boolean": [],
+          "json": []
+        }
+      },
+      "name": "Set – Preparar correo",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [1350, 200]
+    },
+    {
+      "parameters": {
+        "resource": "mail",
+        "operation": "send",
+        "to": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "text": "={{ $json.body }}"
+      },
+      "name": "Enviar correo",
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 1,
+      "position": [1550, 200]
+    }
+  ],
+  "connections": {
+    "Cron (Viernes 09:00)": {
+      "main": [
+        [
+          {
+            "node": "Calcular próximo lunes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular próximo lunes": {
+      "main": [
+        [
+          {
+            "node": "Get rows from sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get rows from sheet": {
+      "main": [
+        [
+          {
+            "node": "Convertir fechas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convertir fechas": {
+      "main": [
+        [
+          {
+            "node": "Set – Preparar fechas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set – Preparar fechas": {
+      "main": [
+        [
+          {
+            "node": "IF – ¿Es lunes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF – ¿Es lunes?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Set – Preparar correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set – Preparar correo": {
+      "main": [
+        [
+          {
+            "node": "Enviar correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
